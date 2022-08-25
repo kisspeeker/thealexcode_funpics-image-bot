@@ -1,0 +1,23 @@
+{
+  "name": "telegram-bot-funpics-generator",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Shiryakov Alexander <alcryalcry@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "serve": "nodemon index.js",
+    "start": "forever start index.js",
+    "stop": "forever stop 0"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.2.3",
+    "telegraf": "^4.7.0"
+  },
+  "devDependencies": {
+    "dotenv-flow": "^3.2.0",
+    "forever": "^4.0.3",
+    "nodemon": "^2.0.19"
+  }
+}
