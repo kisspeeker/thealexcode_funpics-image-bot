@@ -1,0 +1,12 @@
+=== Thu Aug 25 2022 08:35:43 GMT+0300 (Moscow Standard Time) ===
+chatId: 414679260;
+username: this_is_alexander_the_great;
+message: hello baby!;
+imagePath: https://api.deepai.org/job-view-file/04bffc20-263f-4dd0-a7a7-553fcd4ebd66/outputs/output.jpg;
+
+=== Mon Aug 29 2022 04:46:14 GMT+0300 (Moscow Standard Time) ===
+chatId: 414679260;
+username: this_is_alexander_the_great;
+message: privet;
+imagePath: https://api.deepai.org/job-view-file/7cd1f312-89e2-442c-94ff-76b8eb942857/outputs/output.jpg;
+

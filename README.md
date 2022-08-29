@@ -11,10 +11,10 @@ yarn serve
 
 ```bash
 yarn
-yarn start
+yarn start-forever
 ```
 
 To stop server:
 ```bash
-yarn stop
+yarn stop-forever
 ```

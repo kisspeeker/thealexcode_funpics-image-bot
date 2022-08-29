@@ -7,8 +7,8 @@
   "type": "module",
   "scripts": {
     "serve": "nodemon index.js",
-    "start": "forever start index.js",
-    "stop": "forever stop 0"
+    "start-forever": "forever start index.js",
+    "stop-forever": "forever stop 0"
   },
   "dependencies": {
     "form-data": "^4.0.0",

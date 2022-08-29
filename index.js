@@ -9,6 +9,7 @@ import {
   IMAGE_GENERATOR_URL_PREFIX,
   MESSAGES,
   LOGS_PATH,
+  ADMIN_CHAT_ID,
 } from './constants.js';
 
 const bot = new Telegraf(BOT_TOKEN);
@@ -34,11 +35,30 @@ bot.start(async (ctx) => {
   }
 });
 
+bot.command('logs', (ctx) => {
+  try {
+    const { id } = ctx?.message?.from;
+    const logsDocument = fs.createReadStream(LOGS_PATH, 'utf8');
+
+    if (ADMIN_CHAT_ID && String(id) === ADMIN_CHAT_ID) {
+      ctx.replyWithDocument({
+        source: logsDocument,
+        filename: 'logs.txt',
+      })
+    }
+  } catch(e) {
+    console.error(e);
+    throw new Error(`${MESSAGES.errorLogsSend}: ${e}`);
+  }
+})
+
+
 bot.on('text', async (ctx) => {
   try {
     const message = ctx?.message?.text?.replace('/', '');
     const { id, username } = ctx?.message?.from;
-    const imagePath = await postData(message).then(path => `${IMAGE_GENERATOR_URL_PREFIX}/${path}`) || 'undefined image';
+    // const imagePath = await requestImage(message).then(path => `${IMAGE_GENERATOR_URL_PREFIX}/${path}`) || 'undefined image';
+    const imagePath = await requestImage(message).then((res) => res?.output_url || 'undefined image');
 
     ctx.replyWithPhoto(imagePath);
 
@@ -54,21 +74,24 @@ bot.launch().then(() => {
 });
 
 async function pushLogMessage(message = '') {
-  await fs.appendFile(LOGS_PATH, `=== ${new Date()} ===\n${message}\n\r`, (e) => console.error(e));
+  await fs.appendFile(LOGS_PATH, `=== ${new Date()} ===\n${message}\n\n`, (e) => console.error(e));
 }
 
-async function postData(text) {
+async function requestImage(text) {
   try {
     const formData = new FormData();
-    formData.append('word', text);
+    formData.append('text', text);
 
     const response = await fetch(IMAGE_GENERATOR_URL, {
       method: 'POST',
       body: formData,
+      headers: {
+        'api-key': 'quickstart-QUdJIGlzIGNvbWluZy4uLi4K'
+      }
     });
-    return await response.text();
+    return await response.json();
   } catch(e) {
     console.error(e);
-    return Promise.reject(`${MESSAGES.errorPostData}: ${e}`)
+    return Promise.reject(`${MESSAGES.errorRequestImage}: ${e}`)
   }
 };
