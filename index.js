@@ -2,7 +2,6 @@ import fs from 'fs';
 import { Telegraf } from 'telegraf';
 
 import { IMAGE_GENERATORS } from './src/imageGenerators.js';
-
 import {
   BOT_TOKEN,
   CURRENT_IMAGE_GENERATOR,
@@ -14,15 +13,6 @@ import {
 } from './src/constants.js';
 
 const bot = new Telegraf(BOT_TOKEN);
-
-bot.catch(async (err, ctx) => {
-  try {
-    console.error(`${ctx.updateType}`, err);
-    await logMessage(LOGS_TYPES.error, `type: ${ctx.updateType}. ${err}`)
-  } catch(e) {
-    console.error(e);
-  }
-});
 
 bot.start(async (ctx) => {
   try {
@@ -46,7 +36,7 @@ bot.command('logs', async (ctx) => {
 
       ctx.replyWithDocument({
         source: logsDocument,
-        filename: 'logs.txt',
+        filename: LOGS_PATH.split('/').pop(),
       })
     }
   } catch(e) {
@@ -66,8 +56,16 @@ bot.on('text', async (ctx) => {
 
     await logMessage(LOGS_TYPES.successRequestImage, `chatId: ${id};\nusername: ${username};\nmessage: ${message};\nimageGenerator: ${CURRENT_IMAGE_GENERATOR};\nimagePath: ${imagePath};`);
   } catch(e) {
-    console.error(ERRORS.messageHandler);
     throw new Error(`${ERRORS.messageHandler}: ${e}`);
+  }
+});
+
+bot.catch(async (err, ctx) => {
+  try {
+    console.error(`${ctx.updateType}`, err);
+    await logMessage(LOGS_TYPES.error, `type: ${ctx.updateType}. ${err}`)
+  } catch(e) {
+    console.error(e);
   }
 });
 
@@ -75,10 +73,10 @@ bot.launch().then(() => {
   console.warn('BOT STARTED');
 });
 
-function requestImageFromGenerator(message = '') {
-  return IMAGE_GENERATORS[CURRENT_IMAGE_GENERATOR].requestImage(message);
+async function requestImageFromGenerator(message = '') {
+  return await IMAGE_GENERATORS[CURRENT_IMAGE_GENERATOR].requestImage(message);
 }
 
 async function logMessage(type = '', message = '') {
-  await fs.appendFile(LOGS_PATH, `=== ${type.toUpperCase()} ===\n=== ${new Date()} ===\n${message}\n\n`, (e) => console.error(e));
+  await fs.appendFile(LOGS_PATH, `=== ${type.toUpperCase()} ===\n=== ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })} MSK ===\n${message}\n\n`, (e) => console.error(e));
 }
