@@ -3,18 +3,20 @@
 ## Developing
 
 ```bash
-yarn
-yarn serve
+docker context use default
+docker-compose up -d
 ```
 
-## Production
+## Deploy
 
 ```bash
-yarn
-yarn start-forever
+docker context use remote
+docker-compose up -d
 ```
 
-To stop server:
+### rebuild production:
+
 ```bash
-yarn stop-forever
+docker context use remote
+docker-compose up --build -d
 ```

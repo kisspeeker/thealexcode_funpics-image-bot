@@ -1,0 +1,8 @@
+version: '3'
+services:
+  funpics-image-bot:
+    build: .
+    image: thealexcode/funpics-image-bot
+    container_name: funpics-image-bot
+    ports:
+      - "3001:80"
