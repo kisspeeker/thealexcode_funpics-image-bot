@@ -12,4 +12,4 @@ EXPOSE 80
 
 VOLUME [ "/app/data" ]
 
-CMD [ "yarn", "start-forever" ]
+CMD [ "yarn", "start" ]

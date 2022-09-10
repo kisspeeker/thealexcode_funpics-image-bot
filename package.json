@@ -7,8 +7,7 @@
   "type": "module",
   "scripts": {
     "serve": "nodemon index.js",
-    "start-forever": "forever start index.js",
-    "stop-forever": "forever stop 0"
+    "start": "node index.js"
   },
   "dependencies": {
     "axios": "0.27.2",
