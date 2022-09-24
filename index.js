@@ -56,6 +56,7 @@ bot.command('logs', async (ctx) => {
       fs.access(LOGS_PATH, async (err) => {
         if (err) {
           console.error(err);
+          return;
         }
         logsDocument.destroy();
         await fs.unlink(LOGS_PATH, (e) => console.error(e));
