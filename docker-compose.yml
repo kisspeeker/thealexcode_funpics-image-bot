@@ -7,13 +7,4 @@ services:
     restart: always
     ports:
       - 3001:80
-    volumes:
-      - logs:/app/data/:rw
-
-volumes:
-  logs:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./data/
-      o: bind
+    env_file: ./.env
