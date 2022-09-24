@@ -10,16 +10,23 @@ import {
   ADMIN_CHAT_ID,
   LOGS_TYPES,
   ERRORS,
+  API_LOGS,
 } from './src/constants.js';
+import axios from 'axios';
 
 const bot = new Telegraf(BOT_TOKEN);
 
 bot.start(async (ctx) => {
   try {
     const { id, username } = ctx?.message?.from;
-    ctx.reply(MESSAGES.start);
 
-    await logMessage(LOGS_TYPES.successStart, `chatId: ${id};\nusername: ${username};`);
+    await ctx.reply(MESSAGES.start);
+    await sendStartMessageToAdmin(ctx);
+    await logMessage({
+      type: LOGS_TYPES.successStart,
+      chatId: id,
+      userName: username,
+    });
   } catch(e) {
     console.error(e);
     throw new Error(`${ERRORS.start}: ${e}`);
@@ -31,13 +38,26 @@ bot.command('logs', async (ctx) => {
     const { id, username } = ctx?.message?.from;
 
     if (ADMIN_CHAT_ID && String(id) === ADMIN_CHAT_ID) {
-      const logsDocument = fs.createReadStream(LOGS_PATH, 'utf8');
-      await logMessage(LOGS_TYPES.logsDownload, `chatId: ${id};\nusername: ${username};`);
+      const logsDocument = await requestLogsAndGenerateFile();
 
-      ctx.replyWithDocument({
+      await ctx.replyWithDocument({
         source: logsDocument,
         filename: LOGS_PATH.split('/').pop(),
       })
+
+      fs.access(LOGS_PATH, async (err) => {
+        if (err) {
+          console.error(err);
+        }
+        logsDocument.destroy();
+        await fs.unlink(LOGS_PATH, (e) => console.error(e));
+      });
+
+      await logMessage({
+        type: LOGS_TYPES.logsDownload,
+        chatId: id,
+        userName: username,
+      });
     }
   } catch(e) {
     console.error(e);
@@ -52,21 +72,23 @@ bot.on('text', async (ctx) => {
     const message = ctx?.message?.text?.replace('/', '');
     const imagePath = await requestImageFromGenerator(message);
 
-    ctx.replyWithPhoto(imagePath);
+    await ctx.replyWithPhoto(imagePath);
 
-    await logMessage(LOGS_TYPES.successRequestImage, `chatId: ${id};\nusername: ${username};\nmessage: ${message};\nimageGenerator: ${CURRENT_IMAGE_GENERATOR};\nimagePath: ${imagePath};`);
+    await logMessage({
+      type: LOGS_TYPES.successRequestImage,
+      chatId: id,
+      userName: username,
+      message: message,
+      imagePath: imagePath,
+      imageGenerator: CURRENT_IMAGE_GENERATOR,
+    });
   } catch(e) {
     throw new Error(`${ERRORS.messageHandler}: ${e}`);
   }
 });
 
 bot.catch(async (err, ctx) => {
-  try {
-    console.error(`${ctx.updateType}`, err);
-    await logMessage(LOGS_TYPES.error, `type: ${ctx.updateType}. ${err}`)
-  } catch(e) {
-    console.error(e);
-  }
+  console.error(err);
 });
 
 bot.launch().then(() => {
@@ -77,6 +99,29 @@ async function requestImageFromGenerator(message = '') {
   return await IMAGE_GENERATORS[CURRENT_IMAGE_GENERATOR].requestImage(message);
 }
 
-async function logMessage(type = '', message = '') {
-  await fs.appendFile(LOGS_PATH, `=== ${type.toUpperCase()} ===\n=== ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })} MSK ===\n${message}\n\n`, (e) => console.error(e));
+async function logMessage(data = {}) {
+  await axios.post(API_LOGS, {
+    data: {
+      type: String(data.type || '-'),
+      chatId: String(data.chatId || '-'),
+      userName: String(data.userName || '-'),
+      message: String(data.message || '-'),
+      imagePath: String(data.imagePath || '-'),
+      imageGenerator: String(data.imageGenerator || '-'),
+    }
+  })
+}
+
+async function requestLogsAndGenerateFile() {
+  const res = (await axios.get(API_LOGS)).data
+  
+  await fs.writeFile(LOGS_PATH, JSON.stringify(res), 'utf8', (e) => console.error(e));
+  
+  return await fs.createReadStream(LOGS_PATH, 'utf8');
+}
+
+async function sendStartMessageToAdmin(ctx) {
+  const { id, username } = ctx?.message?.from;
+
+  await ctx.telegram.sendMessage(ADMIN_CHAT_ID, `🔥 New user! \n\nid: ${id} \nusername: ${username}`)
 }
