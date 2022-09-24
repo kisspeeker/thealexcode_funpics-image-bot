@@ -10,11 +10,19 @@ import {
   ADMIN_CHAT_ID,
   LOGS_TYPES,
   ERRORS,
-  API_LOGS,
+  API_ROUTE_LOGS,
+  API_KEY
 } from './src/constants.js';
 import axios from 'axios';
 
 const bot = new Telegraf(BOT_TOKEN);
+
+const axiosInstance = axios.create({
+  headers: {
+    Accept: 'application/json',
+    Authorization: `Bearer ${API_KEY}`
+  },
+});
 
 bot.start(async (ctx) => {
   try {
@@ -100,7 +108,7 @@ async function requestImageFromGenerator(message = '') {
 }
 
 async function logMessage(data = {}) {
-  await axios.post(API_LOGS, {
+  await axiosInstance.post(API_ROUTE_LOGS, {
     data: {
       type: String(data.type || '-'),
       chatId: String(data.chatId || '-'),
@@ -113,7 +121,7 @@ async function logMessage(data = {}) {
 }
 
 async function requestLogsAndGenerateFile() {
-  const res = (await axios.get(API_LOGS)).data
+  const res = (await axiosInstance.get(API_ROUTE_LOGS)).data
   
   await fs.writeFile(LOGS_PATH, JSON.stringify(res), 'utf8', (e) => console.error(e));
   
