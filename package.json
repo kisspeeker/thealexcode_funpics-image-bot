@@ -2,7 +2,7 @@
   "name": "telegram-bot-funpics-generator",
   "version": "0.0.1",
   "main": "index.js",
-  "author": "Shiryakov Alexander <alcryalcry@gmail.com>",
+  "author": "Shiriakov Aleksandr <alcryalcry@gmail.com>",
   "license": "MIT",
   "type": "module",
   "scripts": {
